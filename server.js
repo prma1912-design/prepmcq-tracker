@@ -31,21 +31,7 @@ function saveData(data) {
 // Initialize data
 let data = loadData();
 
-// REDIRECT ROUTE - This is the magic!
-app.get('/:name', (req, res) => {
-  const name = req.params.name.toLowerCase();
-  
-  if (trackingLinks[name]) {
-    data.clicks[name] = (data.clicks[name] || 0) + 1;
-    saveData(data);
-    console.log(`✓ Click recorded for "${name}" - Total: ${data.clicks[name]}`);
-    res.redirect(trackingLinks[name]);
-  } else {
-    res.send('Link not found. Available: ' + Object.keys(trackingLinks).join(', '));
-  }
-});
-
-// DASHBOARD - See your stats
+// DASHBOARD - must come FIRST
 app.get('/', (req, res) => {
   let html = `
     <html>
@@ -73,7 +59,7 @@ app.get('/', (req, res) => {
     const clicks = data.clicks[name] || 0;
     const conversions = data.conversions[name] || 0;
     const rate = clicks > 0 ? ((conversions / clicks) * 100).toFixed(1) : 0;
-    html += `<tr><td><strong>${name}</strong></td><td>http://localhost:3000/${name}</td><td>${clicks}</td><td>${conversions}</td><td>${rate}%</td></tr>`;
+    html += `<tr><td><strong>${name}</strong></td><td>https://prepmcq-tracker.onrender.com/${name}</td><td>${clicks}</td><td>${conversions}</td><td>${rate}%</td></tr>`;
   }
 
   html += `
@@ -92,7 +78,7 @@ app.get('/', (req, res) => {
   res.send(html);
 });
 
-// Add conversion
+// Add conversion route - must come before /:name
 app.get('/add-conversion', (req, res) => {
   const name = req.query.link?.toLowerCase();
   if (name && trackingLinks[name]) {
@@ -102,6 +88,21 @@ app.get('/add-conversion', (req, res) => {
   res.redirect('/');
 });
 
-app.listen(3000, () => {
-  console.log('🚀 PrepMCQ Tracker running at http://localhost:3000');
+// REDIRECT ROUTE - must come LAST
+app.get('/:name', (req, res) => {
+  const name = req.params.name.toLowerCase();
+  
+  if (trackingLinks[name]) {
+    data.clicks[name] = (data.clicks[name] || 0) + 1;
+    saveData(data);
+    console.log(`✓ Click recorded for "${name}" - Total: ${data.clicks[name]}`);
+    res.redirect(trackingLinks[name]);
+  } else {
+    res.status(404).send('Link not found. Available: ' + Object.keys(trackingLinks).join(', '));
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 PrepMCQ Tracker running at http://localhost:${PORT}`);
 });
