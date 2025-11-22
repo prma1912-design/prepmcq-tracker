@@ -6,10 +6,7 @@ app.use(express.json());
 
 // Your tracking links - add more as needed
 const trackingLinks = {
-  'asad': 'https://www.prepmcq.com/register?ref=asad',
-  'ahmed': 'https://www.prepmcq.com/register?ref=ahmed',
-  'facebook': 'https://www.prepmcq.com/register?ref=facebook',
-  'twitter': 'https://www.prepmcq.com/register?ref=twitter'
+  'asad': 'https://www.prepmcq.com/register?ref=asad'
 };
 
 const DATA_FILE = 'clicks.json';
